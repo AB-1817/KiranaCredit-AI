@@ -32,6 +32,7 @@ document.querySelectorAll('[data-screen]').forEach(el => {
 });
 
 // ═══════════════════════ THEME TOGGLE ═══════════════════════
+// Two themes: 'paper' (default editorial light) and 'dark' (terminal warm)
 const themeBtn = document.getElementById('theme_toggle');
 function applyTheme(t) {
   document.body.dataset.theme = t;
@@ -42,14 +43,13 @@ function applyTheme(t) {
   if (window._portfolioRendered) { setTimeout(renderPortfolio, 50); }
 }
 themeBtn.addEventListener('click', () => {
-  applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+  applyTheme(document.body.dataset.theme === 'dark' ? 'paper' : 'dark');
 });
-// load saved theme; default is dark (matches body data-theme)
 try {
   const saved = localStorage.getItem('kc_theme');
   if (saved) applyTheme(saved);
-  else applyTheme('dark');
-} catch (e) { applyTheme('dark'); }
+  else applyTheme('paper');
+} catch (e) { applyTheme('paper'); }
 
 // ═══════════════════════ SAMPLE PERSONAS ═══════════════════════
 const SAMPLES = {
@@ -434,13 +434,16 @@ function generateFlags(rev, ccc, loc, fraud, visual) {
 // ═══════════════════════ MAIN PIPELINE ═══════════════════════
 let locationChart = null, trajChart = null, npaChart = null, geoChart = null;
 
-// Theme-aware color helper for Chart.js
+// Theme-aware color helper for Chart.js (editorial palette)
 function chartColors() {
   const dark = document.body.dataset.theme === 'dark';
   return {
-    text: dark ? '#cbd5e1' : '#475569',
-    grid: dark ? '#252d44' : '#e5e7eb',
-    muted: dark ? '#64748b' : '#94a3b8'
+    text: dark ? '#b8ad95' : '#4a4540',
+    grid: dark ? '#2d2620' : '#d6cfb8',
+    muted: dark ? '#786e58' : '#8a857d',
+    accent: dark ? '#d97a3a' : '#b34a1f',
+    ink: dark ? '#f0e8d8' : '#1a1a1a',
+    surface: dark ? '#1c1814' : '#fbf8f0'
   };
 }
 
@@ -641,11 +644,11 @@ function renderResults(inputs, sample, rev, ccc, loc, visualFeatures, geoFeats, 
       datasets: [{
         label: 'Multiplier',
         data: [loc.demographics, loc.competition, loc.traffic, loc.tierMult],
-        backgroundColor: 'rgba(99, 102, 241, 0.18)',
-        borderColor: '#6366f1',
-        borderWidth: 2,
-        pointBackgroundColor: '#6366f1',
-        pointRadius: 5
+        backgroundColor: 'rgba(179, 74, 31, 0.15)',
+        borderColor: cc.accent,
+        borderWidth: 1.5,
+        pointBackgroundColor: cc.accent,
+        pointRadius: 4
       }]
     },
     options: {
@@ -724,9 +727,9 @@ function renderResults(inputs, sample, rev, ccc, loc, visualFeatures, geoFeats, 
       labels: ['M0', 'M1', 'M2', 'M3', 'M4', 'M5'],
       datasets: [{
         label: 'Confidence', data: trajData,
-        borderColor: '#8b5cf6',
-        backgroundColor: 'rgba(139, 92, 246, 0.15)',
-        fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#8b5cf6'
+        borderColor: cc.accent,
+        backgroundColor: 'rgba(179, 74, 31, 0.12)',
+        fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: cc.accent, borderWidth: 1.5
       }]
     },
     options: {
@@ -895,8 +898,8 @@ function renderPortfolio() {
       data: {
         labels: ['0.90+', '0.70–0.80', '0.50–0.70', '<0.50'],
         datasets: [
-          { label: 'Predicted NPA', data: [5, 11, 22, 40], backgroundColor: '#a5b4fc', borderRadius: 6 },
-          { label: 'Actual NPA',   data: [5, 11, 24, 38], backgroundColor: '#6366f1', borderRadius: 6 }
+          { label: 'Predicted NPA', data: [5, 11, 22, 40], backgroundColor: cc.muted, borderRadius: 0 },
+          { label: 'Actual NPA',   data: [5, 11, 24, 38], backgroundColor: cc.accent, borderRadius: 0 }
         ]
       },
       options: {
@@ -920,9 +923,9 @@ function renderPortfolio() {
         labels: ['Tier 1 Metro', 'Tier 2 City', 'Tier 3 Town', 'Rural'],
         datasets: [{
           data: [42, 78, 95, 32],
-          backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b'],
+          backgroundColor: [cc.accent, cc.ink, cc.muted, cc.grid],
           borderWidth: 2,
-          borderColor: dark ? '#131829' : '#ffffff'
+          borderColor: cc.surface
         }]
       },
       options: {
@@ -963,8 +966,8 @@ function makeSparkline(data) {
   const range = max - min || 1;
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
   const last = data[data.length - 1], first = data[0];
-  const color = last < first ? '#ef4444' : '#10b981';
-  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${color}" stroke-width="2" points="${pts}"/></svg>`;
+  const color = last < first ? '#8c2818' : '#2d5a3d';
+  return `<svg class="sparkline" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${color}" stroke-width="1.5" points="${pts}"/></svg>`;
 }
 
 // ═══════════════════════ SETTINGS SLIDERS ═══════════════════════
