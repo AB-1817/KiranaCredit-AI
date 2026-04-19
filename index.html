@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KiranaCredit AI · Remote Cash Flow Underwriting</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body data-theme="dark">
+
+<!-- ============ SVG ICON SPRITE ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- All icons drawn at 24x24 viewBox, stroke-based, currentColor -->
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-file-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+
+    <!-- Theme -->
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+
+    <!-- Domain icons -->
+    <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 1.5-4h17L22 7"/><path d="M22 7v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0V7"/><path d="M4 11v9h16v-9"/><path d="M9 22V13h6v9"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-rupee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l9 8M6 13h3a5 5 0 0 0 0-10"/></symbol>
+    <symbol id="i-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><line x1="3" y1="20" x2="21" y2="20"/></symbol>
+    <symbol id="i-trend-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+    <symbol id="i-credit-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+    <symbol id="i-road" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="m7 22 1-20"/><path d="m17 22-1-20"/><path d="M12 8v2"/><path d="M12 14v2"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="brand" data-screen="landing">
+    <div class="logo-mark">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#e0e7ff"/></linearGradient></defs>
+        <path d="M6 8 L26 8 L24 24 L8 24 Z" fill="none" stroke="url(#lg)" stroke-width="2.4" stroke-linejoin="round"/>
+        <circle cx="12" cy="14" r="1.6" fill="#fff"/><circle cx="20" cy="14" r="1.6" fill="#fff"/>
+        <path d="M11 19 L21 19" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1>KiranaCredit <span class="grad-text">AI</span></h1>
+      <p class="tagline">Vision · Geo · Behavioral Intelligence</p>
+    </div>
+  </div>
+
+  <nav class="topnav">
+    <button class="nav-pill active" data-screen="landing"><svg class="icon-sm"><use href="#i-home"/></svg>Home</button>
+    <button class="nav-pill" data-screen="wizard"><svg class="icon-sm"><use href="#i-plus"/></svg>New Assessment</button>
+    <button class="nav-pill" data-screen="result"><svg class="icon-sm"><use href="#i-file-check"/></svg>Result</button>
+    <button class="nav-pill" data-screen="portfolio"><svg class="icon-sm"><use href="#i-grid"/></svg>Portfolio</button>
+    <button class="nav-pill" data-screen="settings"><svg class="icon-sm"><use href="#i-settings"/></svg>Settings</button>
+  </nav>
+
+  <div class="topbar-actions">
+    <button id="theme_toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+      <svg class="icon"><use href="#i-sun"/></svg>
+    </button>
+    <div class="user-chip">
+      <div class="avatar">AS</div>
+      <div class="user-meta"><b>Anjali S.</b><span>Credit Officer</span></div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ═══════════════ SCREEN 1: LANDING ═══════════════ -->
+  <section id="screen-landing" class="screen active">
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <span class="hero-tag"><svg class="icon-sm"><use href="#i-trophy"/></svg> Hackathon Submission · Problem Statement 4C</span>
+        <h1 class="hero-title">A Credit Bureau for the<br/><span class="grad-text">Physical World</span></h1>
+        <p class="hero-sub">Remote cash flow underwriting for India's <b>13M+ kirana stores</b>. We replaced a 5-day, ₹2,000 field-officer process with a <b>10-second AI pipeline</b> that fuses vision, geography, payment behavior, and economic reasoning — without requiring a single bank statement.</p>
+        <div class="hero-cta">
+          <button class="btn-primary lg" data-screen="wizard"><svg class="icon-sm"><use href="#i-zap"/></svg> Run Live Assessment</button>
+          <button class="btn-ghost lg" data-screen="portfolio"><svg class="icon-sm"><use href="#i-bar-chart"/></svg> View Portfolio</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hstat"><b>13M+</b><span>Kirana Stores</span></div>
+          <div class="hstat"><b>₹4-6L Cr</b><span>Untapped Credit</span></div>
+          <div class="hstat"><b>90%</b><span>Cost Reduction</span></div>
+          <div class="hstat"><b>&lt;10 sec</b><span>Inference Time</span></div>
+          <div class="hstat"><b>20-30%</b><span>Fewer Defaults</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <p class="section-eyebrow">System Architecture</p>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">From smartphone photo to disbursement decision in under 10 seconds</p>
+      <div class="flow-strip">
+        <div class="flow-step"><span class="flow-num">01</span><b>Capture</b><p>Field agent uploads 3–5 photos + GPS coordinates via mobile app</p></div>
+        <div class="flow-step"><span class="flow-num">02</span><b>Vision</b><p>14 features extracted (V1–V7 visual + G1–G7 geo-spatial)</p></div>
+        <div class="flow-step"><span class="flow-num">03</span><b>Fusion</b><p>Supply × Demand × Location × Seasonality fusion model</p></div>
+        <div class="flow-step"><span class="flow-num">04</span><b>Trust</b><p>5 fraud patterns + 4-component confidence score</p></div>
+        <div class="flow-step"><span class="flow-num">05</span><b>Decide</b><p>Loan eligibility band + LOS-ready JSON output</p></div>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <h2 class="section-title center">6 Core Innovations</h2>
+      <p class="section-sub center">Each independently grounded in microeconomics. Together unbeatable.</p>
+      <div class="innov-grid">
+        <div class="innov-card">
+          <div class="innov-num">1</div>
+          <svg class="innov-glyph"><use href="#i-rupee"/></svg>
+          <h3>Multi-Signal Revenue Proxy</h3>
+          <p>Fuses UPI history (40%) + distributor orders (40%) + Google demand (20%). Single inflated source can't fool consensus. Catches 3 fraud patterns at intake.</p>
+          <div class="innov-tag">Revenue</div>
+        </div>
+        <div class="innov-card">
+          <div class="innov-num">2</div>
+          <svg class="innov-glyph"><use href="#i-bar-chart"/></svg>
+          <h3>Cash Conversion Cycle</h3>
+          <p>Inventory + Receivables − Payables. Reveals true solvency. Auto-recommends loan band: supplier-funded, balanced, capital-intensive, or high-risk.</p>
+          <div class="innov-tag">Solvency</div>
+        </div>
+        <div class="innov-card">
+          <div class="innov-num">3</div>
+          <svg class="innov-glyph"><use href="#i-map"/></svg>
+          <h3>Location Intelligence</h3>
+          <p>Demographics × Competition × Traffic × Tier produces 0.35x–1.85x multiplier. Free Census + OSM + Google Places. Tier 2/3 markets unlocked.</p>
+          <div class="innov-tag">Geography</div>
+        </div>
+        <div class="innov-card">
+          <div class="innov-num">4</div>
+          <svg class="innov-glyph"><use href="#i-eye"/></svg>
+          <h3>Vision Validation</h3>
+          <p>7 visual features: Shelf Density, SKU Diversity, Inventory Value, Refill Signal, Infrastructure, Store Size, Category Mix. Each economically grounded.</p>
+          <div class="innov-tag">Vision</div>
+        </div>
+        <div class="innov-card">
+          <div class="innov-num">5</div>
+          <svg class="innov-glyph"><use href="#i-search"/></svg>
+          <h3>Payment Fingerprinting</h3>
+          <p>5 fraud patterns analyzed over 30-day UPI history. Catches 35% of staged stores that fool vision systems. Behavioral truth over surface optics.</p>
+          <div class="innov-tag">Fraud</div>
+        </div>
+        <div class="innov-card">
+          <div class="innov-num">7</div>
+          <svg class="innov-glyph"><use href="#i-trend-up"/></svg>
+          <h3>Dynamic Recalibration</h3>
+          <p>Every EMI payment retrains the model. Portfolio-level NPA learning auto-tunes weights. Catches default at day 30, not month 6.</p>
+          <div class="innov-tag">Learning</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <p class="section-eyebrow">Industry Transformation</p>
+      <h2 class="section-title">Before <span class="italic">vs</span> After</h2>
+      <p class="section-sub">From manual judgement to AI-driven credit intelligence</p>
+      <div class="vs-grid">
+        <div class="vs-card vs-before">
+          <h3><svg class="icon-sm"><use href="#i-clipboard"/></svg> Manual Underwriting (Today)</h3>
+          <ul>
+            <li>Field officer visits store · 30–60 min observation</li>
+            <li>₹800–₹2,000 per application</li>
+            <li>5–10 days to decision</li>
+            <li>±40% income variance between officers</li>
+            <li>Owner-declared income inflated 30–80%</li>
+            <li>Min loan ₹1.5–2L (cost floor)</li>
+            <li>Tier 2/3 unreachable</li>
+          </ul>
+        </div>
+        <div class="vs-card vs-after">
+          <h3><svg class="icon-sm"><use href="#i-zap"/></svg> KiranaCredit AI</h3>
+          <ul>
+            <li>5 photos + GPS · processed in 10 sec</li>
+            <li>₹80–₹200 per application (90% ↓)</li>
+            <li>&lt;24 hours to disbursement</li>
+            <li>Deterministic — same input, same output</li>
+            <li>Multi-signal fusion (no owner self-report)</li>
+            <li>₹25,000+ loans now profitable</li>
+            <li>Works anywhere in India</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-wrap">
+      <p class="section-eyebrow">Transparency Protocol</p>
+      <h2 class="section-title">Judging Criteria</h2>
+      <p class="section-sub">Our weighted evaluation engine maps to every dimension judges score</p>
+      <div class="criteria-grid">
+        <div class="crit-card" data-num="01">
+          <b>Feature Depth</b>
+          <p>14 features documented (V1–V7 + G1–G7) with computation method, economic interpretation, calibration range.</p>
+          <div class="crit-weight"><div style="width:35%"></div></div>
+          <div class="crit-weight-label">Weighted 35% of total</div>
+        </div>
+        <div class="crit-card" data-num="02">
+          <b>Economic Logic</b>
+          <p>Supply-demand fusion model. Category-mix margin tables. Seasonality calendar. Peer benchmarking.</p>
+          <div class="crit-weight"><div style="width:25%"></div></div>
+          <div class="crit-weight-label">Weighted 25% of total</div>
+        </div>
+        <div class="crit-card" data-num="03">
+          <b>Uncertainty Modeling</b>
+          <p>Monte Carlo propagation. 4-component confidence score. 5 confidence tiers → workflow routing.</p>
+          <div class="crit-weight"><div style="width:15%"></div></div>
+          <div class="crit-weight-label">Weighted 15% of total</div>
+        </div>
+        <div class="crit-card" data-num="04">
+          <b>Fraud Resilience</b>
+          <p>5 manipulation patterns explicitly modeled. Multi-image consistency. Cross-signal plausibility.</p>
+          <div class="crit-weight"><div style="width:20%"></div></div>
+          <div class="crit-weight-label">Weighted 20% of total</div>
+        </div>
+        <div class="crit-card" data-num="05">
+          <b>Practicality</b>
+          <p>REST API. LOS-ready JSON. Mobile-first capture. Offline queueing. Full audit trail.</p>
+          <div class="crit-weight"><div style="width:5%"></div></div>
+          <div class="crit-weight-label">Weighted 5% of total</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>KiranaCredit AI · Building credit infrastructure for the informal economy · Hackathon Prototype 2026</p>
+    </footer>
+  </section>
+
+  <!-- ═══════════════ SCREEN 2: WIZARD ═══════════════ -->
+  <section id="screen-wizard" class="screen">
+    <div class="container">
+      <div class="page-head">
+        <p class="eyebrow">Live Workflow</p>
+        <h2>New <span class="italic">Assessment</span></h2>
+        <p class="muted">Complete 4 steps to underwrite a kirana store in under 10 seconds.</p>
+      </div>
+
+      <div class="step-tracker">
+        <div class="track-step active" data-step="1"><span class="track-num">1</span><span>Store Details</span></div>
+        <div class="track-line"></div>
+        <div class="track-step" data-step="2"><span class="track-num">2</span><span>Photos</span></div>
+        <div class="track-line"></div>
+        <div class="track-step" data-step="3"><span class="track-num">3</span><span>Signal Sources</span></div>
+        <div class="track-line"></div>
+        <div class="track-step" data-step="4"><span class="track-num">4</span><span>Review &amp; Run</span></div>
+      </div>
+
+      <div class="wizard-grid">
+        <div class="card wizard-content">
+          <div class="wstep active" data-step="1">
+            <p class="step-eyebrow">Step 01 / Phase 04</p>
+            <h3>Merchant Identity Profile</h3>
+            <p class="muted small mb-16">Basic information about the store and owner. GPS coordinates auto-fetched in production via mobile geolocation API.</p>
+
+            <div class="form-row">
+              <label>Quick-Load Sample Persona</label>
+              <div class="chip-row">
+                <button class="chip" data-sample="prime"><svg class="icon-sm"><use href="#i-store"/></svg>Prime · Mumbai Metro</button>
+                <button class="chip" data-sample="good"><svg class="icon-sm"><use href="#i-store"/></svg>Good · Pune Tier 2</button>
+                <button class="chip" data-sample="average"><svg class="icon-sm"><use href="#i-store"/></svg>Average · Lucknow T3</button>
+                <button class="chip" data-sample="weak"><svg class="icon-sm"><use href="#i-store"/></svg>Weak · Rural UP</button>
+                <button class="chip danger" data-sample="fraud"><svg class="icon-sm"><use href="#i-alert-triangle"/></svg>Suspect Fraud</button>
+              </div>
+            </div>
+
+            <div class="form-row two-col">
+              <div><label>Store ID</label><input type="text" id="store_id" value="KR-2026-MH-00847" /></div>
+              <div><label>Store Name</label><input type="text" id="store_name" value="Sharma General Store" /></div>
+            </div>
+            <div class="form-row two-col">
+              <div><label>Owner Name</label><input type="text" id="owner_name" value="Rajesh Sharma" /></div>
+              <div><label>Category</label>
+                <select id="category"><option>Kirana / General Store</option><option>Specialty Grocery</option><option>Convenience</option></select>
+              </div>
+            </div>
+            <div class="form-row two-col">
+              <div><label>GPS Latitude</label><input type="number" id="lat" value="18.5204" step="0.0001" /></div>
+              <div><label>GPS Longitude</label><input type="number" id="lng" value="73.8567" step="0.0001" /></div>
+            </div>
+            <div class="form-row">
+              <label>City Tier</label>
+              <select id="city_tier"><option value="1">Tier 1 Metro</option><option value="2" selected>Tier 2 City</option><option value="3">Tier 3 Town</option><option value="rural">Rural / Village</option></select>
+            </div>
+          </div>
+
+          <div class="wstep" data-step="2">
+            <p class="step-eyebrow">Step 02 / Phase 04</p>
+            <h3>Visual Evidence Capture</h3>
+            <p class="muted small mb-16">Upload 3–5 photos covering interior shelves, counter, exterior, street view. Quality auto-checked on capture.</p>
+
+            <div class="photo-zones">
+              <div class="photo-zone" data-zone="shelves"><svg class="zone-icon"><use href="#i-package"/></svg><b>Interior Shelves</b><span class="muted small">Main inventory area</span></div>
+              <div class="photo-zone" data-zone="counter"><svg class="zone-icon"><use href="#i-credit-card"/></svg><b>Counter</b><span class="muted small">POS / billing area</span></div>
+              <div class="photo-zone" data-zone="exterior"><svg class="zone-icon"><use href="#i-store"/></svg><b>Exterior</b><span class="muted small">Storefront + signage</span></div>
+              <div class="photo-zone" data-zone="street"><svg class="zone-icon"><use href="#i-road"/></svg><b>Street View</b><span class="muted small">Road + neighbors</span></div>
+              <div class="photo-zone" data-zone="overview"><svg class="zone-icon"><use href="#i-image"/></svg><b>Overview</b><span class="muted small">Wide-angle interior</span></div>
+            </div>
+
+            <div class="quality-panel">
+              <h4><svg class="icon-sm"><use href="#i-bar-chart"/></svg> Image Quality Auto-Check</h4>
+              <div class="quality-row">
+                <div class="qbar"><span>Resolution</span><div class="qprogress"><div style="width:92%"></div></div><span>92%</span></div>
+                <div class="qbar"><span>Sharpness</span><div class="qprogress"><div style="width:88%"></div></div><span>88%</span></div>
+                <div class="qbar"><span>Lighting</span><div class="qprogress"><div style="width:81%"></div></div><span>81%</span></div>
+                <div class="qbar"><span>Coverage</span><div class="qprogress"><div style="width:75%"></div></div><span>75%</span></div>
+              </div>
+              <p class="muted small">All photos meet minimum quality. Coverage at 75% — consider adding overview shot for higher confidence.</p>
+            </div>
+          </div>
+
+          <div class="wstep" data-step="3">
+            <p class="step-eyebrow">Step 03 / Phase 04</p>
+            <h3>Signal Source Connectors</h3>
+            <p class="muted small mb-16">Connect data sources for Innovations 1, 2, and 5. In production these use OAuth or NBFC-internal APIs.</p>
+
+            <div class="connector-list">
+              <div class="connector connected">
+                <svg class="conn-icon"><use href="#i-credit-card"/></svg>
+                <div class="conn-info"><b>Razorpay UPI</b><span>30-day transaction history · ₹5/query</span></div>
+                <button class="btn-tiny success"><svg class="icon-xs"><use href="#i-check"/></svg> Connected</button>
+              </div>
+              <div class="connector connected">
+                <svg class="conn-icon"><use href="#i-truck"/></svg>
+                <div class="conn-info"><b>NinjaCart Distributor</b><span>Order frequency, basket, SKU mix</span></div>
+                <button class="btn-tiny success"><svg class="icon-xs"><use href="#i-check"/></svg> Connected</button>
+              </div>
+              <div class="connector connected">
+                <svg class="conn-icon"><use href="#i-globe"/></svg>
+                <div class="conn-info"><b>Google Places</b><span>Reviews, search volume, ratings</span></div>
+                <button class="btn-tiny success"><svg class="icon-xs"><use href="#i-check"/></svg> Connected</button>
+              </div>
+              <div class="connector connected">
+                <svg class="conn-icon"><use href="#i-map"/></svg>
+                <div class="conn-info"><b>OpenStreetMap + Census 2011</b><span>Demographics, competition, road network</span></div>
+                <button class="btn-tiny success"><svg class="icon-xs"><use href="#i-check"/></svg> Connected</button>
+              </div>
+              <div class="connector">
+                <svg class="conn-icon"><use href="#i-clipboard"/></svg>
+                <div class="conn-info"><b>GST Portal (optional)</b><span>If borrower has GSTIN registered</span></div>
+                <button class="btn-tiny">Connect</button>
+              </div>
+            </div>
+
+            <details class="advanced">
+              <summary>Override Auto-Fetched Values (advanced)</summary>
+              <div class="form-row two-col">
+                <div><label>Avg Daily UPI (₹)</label><input type="number" id="upi_daily" value="8000" /></div>
+                <div><label>Cash Ratio (%)</label><input type="number" id="cash_ratio" value="40" /></div>
+              </div>
+              <div class="form-row two-col">
+                <div><label>Avg Distributor Order (₹)</label><input type="number" id="order_size" value="15000" /></div>
+                <div><label>Order Frequency (days)</label><input type="number" id="order_freq" value="3" /></div>
+              </div>
+              <div class="form-row two-col">
+                <div><label>Google Reviews / month</label><input type="number" id="reviews_pm" value="12" /></div>
+                <div><label>Avg Margin (%)</label><input type="number" id="margin" value="18" /></div>
+              </div>
+              <div class="form-row two-col">
+                <div><label>Supplier Pay Days (DPO)</label><input type="number" id="dpo" value="8" /></div>
+                <div><label>Receivables Days</label><input type="number" id="receivables" value="2.5" step="0.1" /></div>
+              </div>
+            </details>
+          </div>
+
+          <div class="wstep" data-step="4">
+            <p class="step-eyebrow">Step 04 / Phase 04</p>
+            <h3>Review &amp; Execute</h3>
+            <p class="muted small mb-16">All inputs ready. Click below to execute the full 6-innovation pipeline.</p>
+
+            <div class="review-summary">
+              <div class="rev-block">
+                <h4>Store</h4>
+                <p><b id="rv_name">—</b> · <span id="rv_id">—</span></p>
+                <p class="muted small">Owner: <span id="rv_owner">—</span></p>
+                <p class="muted small"><svg class="icon-xs"><use href="#i-map-pin"/></svg> <span id="rv_gps">—</span></p>
+              </div>
+              <div class="rev-block">
+                <h4>Photos</h4>
+                <p>5 zones captured · Quality 84%</p>
+                <p class="muted small">Coverage 75% · No blur detected</p>
+              </div>
+              <div class="rev-block">
+                <h4>Signals</h4>
+                <p>4 of 5 sources connected</p>
+                <p class="muted small">UPI · Distributor · Google · OSM/Census</p>
+              </div>
+              <div class="rev-block">
+                <h4>Estimated Time</h4>
+                <p><b>~8 seconds</b></p>
+                <p class="muted small">Inference cost: ~₹180</p>
+              </div>
+            </div>
+
+            <button id="run_btn" class="btn-primary lg full"><svg class="icon-sm"><use href="#i-zap"/></svg> Execute Underwriting Pipeline</button>
+          </div>
+
+          <div class="wizard-nav">
+            <button id="prev_btn" class="btn-ghost" disabled><svg class="icon-sm"><use href="#i-arrow-left"/></svg> Previous</button>
+            <button id="next_btn" class="btn-primary">Next <svg class="icon-sm"><use href="#i-arrow-right"/></svg></button>
+          </div>
+        </div>
+
+        <div class="wizard-side">
+          <div class="card side-card">
+            <div id="wizard_map" class="mini-map"></div>
+            <div class="location-label">
+              <div class="location-pin"><svg class="icon-sm"><use href="#i-map-pin"/></svg></div>
+              <div>
+                <b>Catchment Preview</b>
+                <span>500m radius active</span>
+              </div>
+            </div>
+          </div>
+          <div class="card side-card">
+            <h4>
+              <span class="settings-card-icon" style="width:28px;height:28px"><svg class="icon-sm"><use href="#i-bar-chart"/></svg></span>
+              AI Pipeline Scope
+            </h4>
+            <ul class="check-list">
+              <li><svg class="icon-xs check"><use href="#i-check-circle"/></svg><div><b>Geospatial Footfall</b><br/><span class="muted small">Real-time heatmaps from OSM &amp; Google</span></div></li>
+              <li><svg class="icon-xs check"><use href="#i-check-circle"/></svg><div><b>Digital Ledger Health</b><br/><span class="muted small">Razorpay &amp; NinjaCart transaction velocity</span></div></li>
+              <li><svg class="icon-xs check"><use href="#i-check-circle"/></svg><div><b>Stock Density Index</b><br/><span class="muted small">Computer vision analysis of shelf photos</span></div></li>
+              <li><svg class="icon-xs check"><use href="#i-check-circle"/></svg><div><b>GST Integrity Score</b><br/><span class="muted small">Verification of filing frequency &amp; accuracy</span></div></li>
+            </ul>
+            <div class="confidence-bar-wrap">
+              <div class="confidence-bar-row"><span>Current Confidence</span><span>0%</span></div>
+              <div class="confidence-bar"><div style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SCREEN 3: PROCESSING ═══════════════ -->
+  <section id="screen-processing" class="screen">
+    <div class="processing-wrap">
+      <div class="processing-header">
+        <h2>Running <span class="grad-text">Underwriting Pipeline</span></h2>
+        <div class="proc-timer-pill">
+          <svg class="icon-sm"><use href="#i-clock"/></svg>
+          <span id="proc_timer">00:00.0</span>
+        </div>
+      </div>
+
+      <div class="proc-grid">
+        <div>
+          <div class="proc-pipeline-head">
+            <h3>Processing Streams</h3>
+            <span>Real-Time Sync</span>
+          </div>
+          <div class="proc-pipeline">
+          <div class="pipe-step" id="ps-1">
+            <svg class="pipe-icon"><use href="#i-rupee"/></svg>
+            <div class="pipe-info"><b>Multi-Signal Aggregation</b><span>Scanning 42 data nodes and API endpoints</span></div>
+            <div class="pipe-status"><svg class="icon-sm"><use href="#i-clock"/></svg></div>
+          </div>
+          <div class="pipe-step" id="ps-2">
+            <svg class="pipe-icon"><use href="#i-bar-chart"/></svg>
+            <div class="pipe-info"><b>Cash Cycle Analysis</b><span>Inventory turnover &amp; liquidity forecasting</span></div>
+            <div class="pipe-status"><svg class="icon-sm"><use href="#i-clock"/></svg></div>
+          </div>
+          <div class="pipe-step" id="ps-3">
+            <svg class="pipe-icon"><use href="#i-map"/></svg>
+            <div class="pipe-info"><b>Geo-Spatial Risk Map</b><span>Local foot traffic &amp; competitor density mapping</span></div>
+            <div class="pipe-status"><svg class="icon-sm"><use href="#i-clock"/></svg></div>
+          </div>
+          <div class="pipe-step" id="ps-4">
+            <svg class="pipe-icon"><use href="#i-eye"/></svg>
+            <div class="pipe-info"><b>Vision Identity Verification</b><span>Matching storefront images with KYC records</span></div>
+            <div class="pipe-status"><svg class="icon-sm"><use href="#i-clock"/></svg></div>
+          </div>
+          <div class="pipe-step" id="ps-5">
+            <svg class="pipe-icon"><use href="#i-shield"/></svg>
+            <div class="pipe-info"><b>Fraud Pattern Engine</b><span>Neural net detection for ledger manipulation</span></div>
+            <div class="pipe-status"><svg class="icon-sm"><use href="#i-clock"/></svg></div>
+          </div>
+          <div class="pipe-step" id="ps-7">
+            <svg class="pipe-icon"><use href="#i-trend-up"/></svg>
+            <div class="pipe-info"><b>Final Limit Recalibration</b><span>Synthesizing all signals into credit ceiling</span></div>
+            <div class="pipe-status"><svg class="icon-sm"><use href="#i-clock"/></svg></div>
+          </div>
+          </div>
+        </div>
+
+        <div class="proc-conf">
+          <h4>Live Confidence Building</h4>
+          <div class="big-ring">
+            <svg viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="85" stroke="#eef2ff" stroke-width="14" fill="none" class="ring-track"/>
+              <circle id="big_arc" cx="100" cy="100" r="85" stroke="url(#bg_grad)" stroke-width="14" fill="none"
+                      stroke-linecap="round" stroke-dasharray="534" stroke-dashoffset="534"
+                      transform="rotate(-90 100 100)"/>
+              <defs><linearGradient id="bg_grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#ec4899"/></linearGradient></defs>
+            </svg>
+            <div class="ring-label"><span id="big_conf">0.00</span><small>Confidence</small></div>
+          </div>
+          <div class="conf-components">
+            <div class="cc-row"><span>Image Quality</span><span id="cc_img">—</span></div>
+            <div class="cc-row"><span>Signal Consistency</span><span id="cc_sig">—</span></div>
+            <div class="cc-row"><span>Peer Alignment</span><span id="cc_peer">—</span></div>
+            <div class="cc-row"><span>Feature Coverage</span><span id="cc_feat">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SCREEN 4: RESULT ═══════════════ -->
+  <section id="screen-result" class="screen">
+    <div id="result-empty" class="empty-state">
+      <svg class="empty-icon"><use href="#i-bar-chart"/></svg>
+      <h3>No assessment yet</h3>
+      <p class="muted">Run an assessment to view results.</p>
+      <button class="btn-primary" data-screen="wizard">Start Assessment</button>
+    </div>
+
+    <div id="result-content" class="hidden">
+      <div class="result-headline card">
+        <div class="rh-left">
+          <p class="rh-eyebrow">Credit Determination</p>
+          <h1 id="r_decision" class="decision">—</h1>
+          <p id="r_decision_sub" class="muted">Decision for <b id="r_store_name">—</b> · <span id="r_store_id">—</span></p>
+          <div class="rh-actions">
+            <button class="btn-primary"><svg class="icon-sm"><use href="#i-check"/></svg> Disburse Credit</button>
+            <button class="btn-ghost"><svg class="icon-sm"><use href="#i-download"/></svg> Download Report</button>
+          </div>
+        </div>
+        <div class="rh-right">
+          <div class="conf-ring-lg">
+            <svg viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="60" stroke="#eef2ff" stroke-width="12" fill="none" class="ring-track"/>
+              <circle id="r_arc" cx="70" cy="70" r="60" stroke="url(#r_grad)" stroke-width="12" fill="none"
+                      stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"
+                      transform="rotate(-90 70 70)"/>
+              <defs><linearGradient id="r_grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#ec4899"/></linearGradient></defs>
+            </svg>
+            <div class="ring-label"><span id="r_conf">0.00</span><small>Confidence</small></div>
+          </div>
+          <div class="conf-tier-pill" id="r_tier_pill">—</div>
+          <div class="conf-tier-sub">Reliability assessment</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <p class="kpi-title">Daily Sales Range</p>
+          <p class="kpi-value" id="r_daily_mid">—</p>
+          <p class="kpi-range" id="r_daily_range">—</p>
+        </div>
+        <div class="kpi-card">
+          <p class="kpi-title">Monthly Revenue</p>
+          <p class="kpi-value" id="r_monthly_mid">—</p>
+          <p class="kpi-range" id="r_monthly_range">—</p>
+        </div>
+        <div class="kpi-card">
+          <p class="kpi-title">Monthly Net Income</p>
+          <p class="kpi-value" id="r_income_mid">—</p>
+          <p class="kpi-range" id="r_income_range">—</p>
+        </div>
+        <div class="kpi-card highlight">
+          <p class="kpi-title">Loan Eligibility</p>
+          <p class="kpi-value" id="r_loan_mid">—</p>
+          <p class="kpi-range" id="r_loan_range">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="result-tabs">
+          <button class="rtab active" data-rtab="multi"><svg class="icon-sm"><use href="#i-rupee"/></svg> Multi-Signal</button>
+          <button class="rtab" data-rtab="ccc"><svg class="icon-sm"><use href="#i-bar-chart"/></svg> Cash Cycle</button>
+          <button class="rtab" data-rtab="location"><svg class="icon-sm"><use href="#i-map"/></svg> Location</button>
+          <button class="rtab" data-rtab="vision"><svg class="icon-sm"><use href="#i-eye"/></svg> Vision (V1–V7)</button>
+          <button class="rtab" data-rtab="geo"><svg class="icon-sm"><use href="#i-globe"/></svg> Geo (G1–G7)</button>
+          <button class="rtab" data-rtab="fraud"><svg class="icon-sm"><use href="#i-search"/></svg> Fraud</button>
+          <button class="rtab" data-rtab="trajectory"><svg class="icon-sm"><use href="#i-trend-up"/></svg> Trajectory</button>
+        </div>
+
+        <div class="rtab-content active" data-rtab="multi">
+          <h3>Multi-Signal Revenue Fusion</h3>
+          <p class="muted small">Three independent signals, weighted ensemble. If they agree → high confidence. If they diverge → fraud flag.</p>
+          <div class="signal-bars">
+            <div class="signal"><span class="signal-label">UPI Signal (40%)</span><div class="bar"><div id="bar_upi" class="fill upi"></div></div><span class="signal-val" id="val_upi">₹0</span></div>
+            <div class="signal"><span class="signal-label">Distributor Orders (40%)</span><div class="bar"><div id="bar_order" class="fill order"></div></div><span class="signal-val" id="val_order">₹0</span></div>
+            <div class="signal"><span class="signal-label">Google Demand (20%)</span><div class="bar"><div id="bar_google" class="fill google"></div></div><span class="signal-val" id="val_google">₹0</span></div>
+          </div>
+          <div class="formula-box"><code>Daily Sales = 0.40 × UPI + 0.40 × Orders + 0.20 × Google</code></div>
+          <div class="agreement"><span>Signal Agreement: <b id="signal_agreement">0%</b></span><span id="agreement_badge" class="badge">—</span></div>
+        </div>
+
+        <div class="rtab-content" data-rtab="ccc">
+          <h3>Cash Conversion Cycle</h3>
+          <p class="muted small">True solvency = how fast does cash recycle? Negative is best (supplier-funded).</p>
+          <div class="ccc-row">
+            <div class="ccc-block positive"><small>Inventory Days</small><b id="ccc_inv">0</b></div>
+            <span class="op">+</span>
+            <div class="ccc-block positive"><small>Receivables Days</small><b id="ccc_rec">0</b></div>
+            <span class="op">−</span>
+            <div class="ccc-block negative"><small>Payables Days</small><b id="ccc_pay">0</b></div>
+            <span class="op">=</span>
+            <div class="ccc-block result"><small>CCC</small><b id="ccc_total">0</b></div>
+          </div>
+          <p class="muted small ccc-explain" id="ccc_explain">—</p>
+          <div class="loan-band-card" id="loan_band_card">
+            <h4>Recommended Loan Structure</h4>
+            <div class="lb-row"><span>Model</span><b id="lb_model">—</b></div>
+            <div class="lb-row"><span>Suggested Tenure</span><b id="lb_tenure">—</b></div>
+            <div class="lb-row"><span>Risk Level</span><b id="lb_risk">—</b></div>
+          </div>
+        </div>
+
+        <div class="rtab-content" data-rtab="location">
+          <h3>Location Intelligence</h3>
+          <div class="loc-grid">
+            <div>
+              <div class="chart-wrap chart-wrap-md"><canvas id="locationChart"></canvas></div>
+              <div class="loc-meta">
+                <div><small>Tier</small><b id="loc_tier">—</b></div>
+                <div><small>Multiplier</small><b id="loc_mult">1.00x</b></div>
+              </div>
+              <div class="formula-box"><code>Mult = 0.30·Demo + 0.25·Comp + 0.25·Traffic + 0.20·Tier</code></div>
+            </div>
+            <div>
+              <div id="result_map" class="result-map"></div>
+              <p class="muted small map-legend">
+                <span class="legend-dot" style="background:#8b5cf6"></span> Store
+                <span class="legend-dot" style="background:#475569"></span> Competitors · 500m catchment
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rtab-content" data-rtab="vision">
+          <h3>Vision Features (V1–V7)</h3>
+          <p class="muted small">7 visual features extracted from store photos. Each economically grounded.</p>
+          <div class="feature-grid" id="vision_features"></div>
+        </div>
+
+        <div class="rtab-content" data-rtab="geo">
+          <h3>Geo-Spatial Features (G1–G7)</h3>
+          <p class="muted small">7 geographic features computed from GPS coordinates.</p>
+          <div class="feature-grid" id="geo_features"></div>
+        </div>
+
+        <div class="rtab-content" data-rtab="fraud">
+          <h3>Payment Fingerprint · 5 Fraud Patterns</h3>
+          <div class="anomaly-meter">
+            <div class="meter-track">
+              <div id="anomaly_marker" class="meter-marker"></div>
+            </div>
+            <div class="meter-labels">
+              <span>Healthy 0.0</span><span>Monitor 0.3</span><span>Review 0.5</span><span>High Risk 0.7+</span>
+            </div>
+          </div>
+          <div class="anomaly-summary">
+            <span>Anomaly Score: <b id="anomaly_score">0.00</b></span>
+            <span id="anomaly_label" class="badge">—</span>
+          </div>
+          <div id="fraud_patterns" class="fraud-pattern-list"></div>
+        </div>
+
+        <div class="rtab-content" data-rtab="trajectory">
+          <h3>Confidence Trajectory (Innovation 7 Simulation)</h3>
+          <p class="muted small">If approved today, projected confidence over next 6 months as EMI data flows in.</p>
+          <div class="chart-wrap chart-wrap-md"><canvas id="trajChart"></canvas></div>
+          <p class="muted small mt-12">Innovation 7 catches default at <b>day 30</b> via missed-EMI signal vs. <b>month 6</b> in traditional underwriting.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3><svg class="icon-sm"><use href="#i-flag"/></svg> Risk Flags</h3>
+          <ul id="risk_flags" class="flag-list"></ul>
+        </div>
+        <div class="card">
+          <h3><svg class="icon-sm"><use href="#i-bar-chart"/></svg> Peer Benchmark</h3>
+          <div class="peer-card">
+            <p class="muted small">Among <b id="peer_n">0</b> similar stores</p>
+            <div class="percentile-bar"><div id="peer_marker" class="pct-marker"></div></div>
+            <div class="pct-labels"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+            <p class="peer-summary"><b id="peer_pct">—</b> percentile · <span id="peer_group">—</span></p>
+          </div>
+          <h4 class="mt-16">Confidence Components</h4>
+          <div class="conf-breakdown">
+            <div class="cb-row"><span>Image Quality (30%)</span><div class="cb-bar"><div id="cb_img"></div></div><b id="cb_img_v">—</b></div>
+            <div class="cb-row"><span>Signal Consistency (25%)</span><div class="cb-bar"><div id="cb_sig"></div></div><b id="cb_sig_v">—</b></div>
+            <div class="cb-row"><span>Peer Alignment (20%)</span><div class="cb-bar"><div id="cb_peer"></div></div><b id="cb_peer_v">—</b></div>
+            <div class="cb-row"><span>Feature Coverage (25%)</span><div class="cb-bar"><div id="cb_feat"></div></div><b id="cb_feat_v">—</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3><svg class="icon-sm"><use href="#i-database"/></svg> Raw JSON Output (NBFC LOS Integration)</h3>
+          <button id="copy_json" class="btn-ghost sm"><svg class="icon-sm"><use href="#i-copy"/></svg> Copy JSON</button>
+        </div>
+        <p class="muted small">Matches PS4C Section 7.5 schema · Direct integration with Nucleus / C-Edge / Finnone LOS</p>
+        <pre id="json_output" class="json-block"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SCREEN 5: PORTFOLIO ═══════════════ -->
+  <section id="screen-portfolio" class="screen">
+    <div class="container">
+      <div class="page-head">
+        <p class="eyebrow">Live Overview</p>
+        <h2>Portfolio <span class="italic">Monitoring</span></h2>
+        <p class="muted">Innovation 7 in production · Real-time confidence recalibration across all active loans</p>
+      </div>
+
+      <div class="port-kpi">
+        <div><span>Total Loans</span><b>247</b><span class="kpi-sub">+18 this month</span></div>
+        <div><span>Active</span><b>219</b><span class="kpi-sub">88.6% utilization</span></div>
+        <div><span>At-Risk</span><b>12</b><span class="kpi-sub">Critical: +3 this week</span></div>
+        <div><span>Portfolio NPA</span><b>8.4%</b><span class="kpi-sub">Below industry 12%</span></div>
+        <div><span>Avg Confidence</span><b>0.78</b><span class="kpi-sub">High Reliability</span></div>
+        <div><span>Total Disbursed</span><b>₹5.2 Cr</b><span class="kpi-sub">Lifetime volume</span></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>NPA by Confidence Tier</h3>
+          <p class="muted small">Predicted vs Actual · Innovation 7 auto-tunes weights</p>
+          <div class="chart-wrap chart-wrap-lg"><canvas id="npaChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Geographic Distribution</h3>
+          <p class="muted small">Loan exposure across India tiers</p>
+          <div class="chart-wrap chart-wrap-lg"><canvas id="geoChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Active Loans · Live Monitoring</h3>
+          <div class="filter-row">
+            <input type="text" placeholder="Search store ID…" class="filter-input" />
+            <select class="filter-input"><option>All Tiers</option><option>Prime</option><option>Good</option><option>Average</option><option>Weak</option></select>
+            <select class="filter-input"><option>All Status</option><option>Healthy</option><option>Watch</option><option>Alert</option></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Store</th><th>Tier</th><th>Loan</th><th>Initial Conf</th><th>Current Conf</th><th>Trajectory</th><th>EMI Status</th><th>Action</th></tr></thead>
+            <tbody id="portfolio_table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card alert-banner">
+        <h3><svg class="icon-sm"><use href="#i-bell"/></svg> System Alerts <span class="badge red" style="margin-left:auto">3 Priority Signals</span></h3>
+        <div class="alert-item">
+          <div>
+            <p class="alert-item-title">Store: KR-DL-12345 · 2m ago</p>
+            <b>Confidence dropped 0.72 → 0.45 in last 7 days</b>
+            <p>EMI 8 days late. Cash flow projection adjusted to −₹22k/week.</p>
+          </div>
+          <div style="display:flex;gap:6px;flex-direction:column">
+            <button class="btn-tiny">Initiate Review</button>
+            <button class="btn-tiny" style="color:var(--red);border-color:var(--red)">Freeze Disbursement</button>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div>
+            <p class="alert-item-title">Store: KR-UP-RURAL · 14h ago</p>
+            <b>Re-assessment shows 18% inventory decline</b>
+            <p>Anomaly score rising. Local micro-economic drift detected in Zone 4.</p>
+          </div>
+          <button class="btn-tiny">Schedule Field Visit</button>
+        </div>
+        <div class="alert-item">
+          <div>
+            <p class="alert-item-title">Store: KR-MH-09812 · 1d ago</p>
+            <b>Sudden 300% spike in digital transactions</b>
+            <p>Anomalous growth detected. Requesting secondary validation of merchant bank statements.</p>
+          </div>
+          <button class="btn-tiny">Restructure Loan</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SCREEN 6: SETTINGS ═══════════════ -->
+  <section id="screen-settings" class="screen">
+    <div class="container">
+      <a class="back-link" data-screen="portfolio"><svg class="icon-sm"><use href="#i-arrow-left"/></svg> Back to Dashboard</a>
+      <div class="page-head">
+        <h2>System Configuration</h2>
+        <p class="muted">Calibrate the underwriting parameters, manage API integrations, and oversee team access controls.</p>
+      </div>
+      <div class="grid-2">
+
+        <div class="card settings-card">
+          <h3>
+            <span class="settings-card-icon"><svg class="icon-sm"><use href="#i-key"/></svg></span>
+            API &amp; Integrations
+          </h3>
+          <div class="form-row">
+            <label>Production API Key</label>
+            <div class="api-key-row">
+              <input type="text" value="kc_live_••••••••••••••••••••••••3a7f" />
+              <button class="copy-btn" title="Copy"><svg class="icon-sm"><use href="#i-copy"/></svg></button>
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Loan Origination System (LOS)</label>
+            <select><option>Finnone Cloud Integrator v4.2</option><option>Nucleus Software</option><option>C-Edge</option><option>Custom REST</option></select>
+          </div>
+          <button class="btn-primary full"><svg class="icon-sm"><use href="#i-zap"/></svg> Refresh Connection</button>
+        </div>
+
+        <div class="card settings-card">
+          <h3>
+            <span class="settings-card-icon"><svg class="icon-sm"><use href="#i-sliders"/></svg></span>
+            Risk Thresholds
+          </h3>
+          <div class="slider-row">
+            <div class="slider-head"><span>Max FOIR (%)</span><b>45%</b></div>
+            <input type="range" min="20" max="80" value="45" />
+          </div>
+          <div class="slider-row">
+            <div class="slider-head"><span>Confidence Score</span><b>82%</b></div>
+            <input type="range" min="0" max="100" value="82" />
+          </div>
+          <div class="form-row two-col">
+            <div class="slider-row" style="margin:0">
+              <div class="slider-head"><span>Tenure (mo)</span><b>24</b></div>
+              <input type="range" min="6" max="60" value="24" />
+            </div>
+            <div class="slider-row" style="margin:0">
+              <div class="slider-head"><span>Int. Rate (%)</span><b>12.5</b></div>
+              <input type="range" min="8" max="24" step="0.5" value="12.5" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <div class="card-head">
+            <h3>
+              <span class="settings-card-icon"><svg class="icon-sm"><use href="#i-monitor"/></svg></span>
+              Weight Overrides
+            </h3>
+            <span class="ai-managed-pill"><svg class="icon-xs"><use href="#i-zap"/></svg> AI Managed</span>
+          </div>
+          <div class="weight-grid">
+            <div class="weight-item">
+              <div class="weight-item-head">Multi-Signal Revenue</div>
+              <div class="weight-item-val"><b>0.85</b><span class="weight-trend down"><svg class="icon-xs"><use href="#i-trend-up"/></svg></span></div>
+            </div>
+            <div class="weight-item">
+              <div class="weight-item-head">Cash Cycle Trust</div>
+              <div class="weight-item-val"><b>1.20</b><span class="weight-trend up"><svg class="icon-xs"><use href="#i-trend-up"/></svg></span></div>
+            </div>
+            <div class="weight-item">
+              <div class="weight-item-head">Location Intelligence</div>
+              <div class="weight-item-val"><b>0.95</b><span class="weight-trend neutral">=</span></div>
+            </div>
+            <div class="weight-item">
+              <div class="weight-item-head">Vision Validation</div>
+              <div class="weight-item-val"><b>1.45</b><span class="weight-trend up"><svg class="icon-xs"><use href="#i-trend-up"/></svg></span></div>
+            </div>
+            <div class="weight-item">
+              <div class="weight-item-head">Fraud Fingerprint</div>
+              <div class="weight-item-val"><b>0.70</b><span class="weight-trend down"><svg class="icon-xs"><use href="#i-trend-up"/></svg></span></div>
+            </div>
+            <div class="weight-item">
+              <div class="weight-item-head">Recalibration Loop</div>
+              <div class="weight-item-val"><b>1.10</b><span class="weight-trend up"><svg class="icon-xs"><use href="#i-trend-up"/></svg></span></div>
+            </div>
+          </div>
+          <div class="weight-info">
+            <svg class="icon-sm"><use href="#i-info"/></svg>
+            <span>Weights are auto-tuned every 24h based on portfolio delinquency trends. Manual overrides will bypass AI optimization for 7 days.</span>
+          </div>
+        </div>
+
+        <div class="card settings-card">
+          <div class="card-head">
+            <h3>
+              <span class="settings-card-icon"><svg class="icon-sm"><use href="#i-users"/></svg></span>
+              Team Members
+            </h3>
+            <button class="btn-tiny"><svg class="icon-xs"><use href="#i-plus"/></svg> Invite</button>
+          </div>
+          <ul class="team-list">
+            <li><div class="avatar small">AB</div><div><b>Akash Bhuyan</b><span class="muted small">Product Lead</span></div><span class="role-pill">Owner</span></li>
+            <li><div class="avatar small">RA</div><div><b>Rahul Atkare</b><span class="muted small">DevOps Engineer</span></div></li>
+            <li><div class="avatar small">RK</div><div><b>Rushikesh Kedar</b><span class="muted small">Software Developer</span></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card system-override">
+        <div class="override-row">
+          <div>
+            <h3 style="margin:0">System Override &amp; Reset</h3>
+            <p>Permanently delete all custom weights and revert to global factory baselines.</p>
+          </div>
+          <button class="btn-ghost" style="color:var(--red);border-color:var(--red)">Purge Configurations</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
